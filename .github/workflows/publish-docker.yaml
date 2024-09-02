@@ -12,7 +12,7 @@ jobs:
   build:
     strategy:
       # Don't overwhelm the toolchain server
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         include:
           - sdk_nrf_branch: main
