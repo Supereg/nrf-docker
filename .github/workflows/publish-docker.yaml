@@ -3,7 +3,7 @@ name: Publish Docker
 on:
   push:
     branches:
-      - saga
+      - main
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
@@ -12,36 +12,28 @@ jobs:
   build:
     strategy:
       # Don't overwhelm the toolchain server
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         include:
           - sdk_nrf_branch: main
             toolchain_version: v2.7.0
             native_board: native_sim
 
-          - sdk_nrf_branch: v2.7-branch
+          - sdk_nrf_branch: v2.7.0
             toolchain_version: v2.7.0
             native_board: native_sim
 
-          - sdk_nrf_branch: v2.6-branch
+          - sdk_nrf_branch: v2.6.1
+            toolchain_version: v2.6.1
+            native_board: native_sim
+
+          - sdk_nrf_branch: v2.6.0
             toolchain_version: v2.6.0
             native_board: native_sim
 
-          - sdk_nrf_branch: v2.5-branch
-            toolchain_version: v2.5.0
+          - sdk_nrf_branch: v2.5.3
+            toolchain_version: v2.5.3
             native_board: native_sim
-
-          - sdk_nrf_branch: v2.4-branch
-            toolchain_version: v2.4.1
-            native_board: native_posix
-
-          - sdk_nrf_branch: v2.3-branch
-            toolchain_version: v2.3.0
-            native_board: native_posix
-
-          - sdk_nrf_branch: v2.2-branch
-            toolchain_version: v2.2.0
-            native_board: native_posix
 
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +41,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
+          docker build -t andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
             --build-arg sdk_nrf_branch=${{ matrix.sdk_nrf_branch }} \
             --build-arg toolchain_version=${{ matrix.toolchain_version }} \
             .
@@ -59,32 +51,32 @@ jobs:
           docker run --rm \
             -v ${PWD}:/workdir/project \
             -w /workdir/nrf/applications/asset_tracker_v2 \
-            nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
+            andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
               west build -b nrf9160dk_nrf9160_ns --build-dir /workdir/project/build -- -DEXTRA_CFLAGS="-Werror -Wno-dev"
 
       - name: Ensure nrfjprog works
         run: |
-          docker run --rm nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} nrfjprog -v
+          docker run --rm andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} nrfjprog -v
 
       - name: Ensure clang-format works
         run: |
-          docker run --rm nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} clang-format --version
+          docker run --rm andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} clang-format --version
 
       - name: Ensure native build works
         run: |
-          docker run --rm nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} west build -b ${{ matrix.native_board }} zephyr/samples/hello_world
+          docker run --rm andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} west build -b ${{ matrix.native_board }} zephyr/samples/hello_world
 
       - name: Ensure zephyr twister unit tests works
         run: |
-          docker run --rm nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} ./zephyr/scripts/twister -p ${{ matrix.native_board }} -T zephyr/samples/subsys/testsuite/integration
+          docker run --rm andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} ./zephyr/scripts/twister -p ${{ matrix.native_board }} -T zephyr/samples/subsys/testsuite/integration
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: nordicplayground
+          username: andreasbauer
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Publish image
         run: |
           docker images
-          docker push nordicplayground/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }}
+          docker push andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }}
