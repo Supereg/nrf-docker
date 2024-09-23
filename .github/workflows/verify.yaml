@@ -17,6 +17,10 @@ jobs:
             toolchain_version: v2.7.0
             native_board: native_sim
 
+          - sdk_nrf_branch: v2.6.2
+            toolchain_version: v2.6.2
+            native_board: native_sim
+
           - sdk_nrf_branch: v2.6.1
             toolchain_version: v2.6.1
             native_board: native_sim
