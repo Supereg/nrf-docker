@@ -18,26 +18,32 @@ jobs:
           - sdk_nrf_branch: main
             toolchain_version: v2.7.0
             native_board: native_sim
+            nrf_26_cherry_pick: false
 
           - sdk_nrf_branch: v2.7.0
             toolchain_version: v2.7.0
             native_board: native_sim
+            nrf_26_cherry_pick: false
 
           - sdk_nrf_branch: v2.6.2
             toolchain_version: v2.6.2
             native_board: native_sim
+            nrf_26_cherry_pick: true
 
           - sdk_nrf_branch: v2.6.1
             toolchain_version: v2.6.1
             native_board: native_sim
+            nrf_26_cherry_pick: true
 
           - sdk_nrf_branch: v2.6.0
             toolchain_version: v2.6.0
             native_board: native_sim
+            nrf_26_cherry_pick: true
 
           - sdk_nrf_branch: v2.5.3
             toolchain_version: v2.5.3
             native_board: native_sim
+            nrf_26_cherry_pick: false
 
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +54,7 @@ jobs:
           docker build -t andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
             --build-arg sdk_nrf_branch=${{ matrix.sdk_nrf_branch }} \
             --build-arg toolchain_version=${{ matrix.toolchain_version }} \
+            --build-arg nrf_26_cherry_pick=${{ matrix.nrf_26_cherry_pick }} \
             .
 
       - name: Build asset_tracker_v2 application

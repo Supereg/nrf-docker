@@ -6,6 +6,7 @@ ARG toolchain_version=v2.7.0
 ARG sdk_nrf_commit
 ARG NORDIC_COMMAND_LINE_TOOLS_VERSION="10-24-0/nrf-command-line-tools-10.24.0"
 ARG arch=amd64
+ARG nrf_26_cherry_pick=false
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -83,6 +84,20 @@ RUN <<EOT
         git checkout ${sdk_nrf_commit};
     fi
     west update --narrow -o=--depth=1
+EOT
+
+SHELL ["nrfutil","toolchain-manager","launch","/bin/bash","--","-c"]
+RUN <<EOT
+    if [[ $nrf_26_cherry_pick = "true" ]]; then
+      echo "Cherry-picking additional fixes for the 2.6 release"
+      cd ./modules/lib/matter
+
+      # Make sure that the full commit tree is available
+      git fetch ncs master
+
+      git cherry-pick e734b79 --no-commit || { echo "Cherry-pick of e734b79 failed"; exit 1; }
+      git cherry-pick 1536ca2 --no-commit || { echo "Cherry-pick of e734b79 failed"; exit 1; }
+    fi
 EOT
 
 # Launch into build environment with the passed arguments
