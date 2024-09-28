@@ -86,12 +86,17 @@ RUN <<EOT
     west update --narrow -o=--depth=1
 EOT
 
+SHELL ["nrfutil","toolchain-manager","launch","/bin/bash","--","-c"]
 RUN <<EOT
     if [[ $nrf_26_cherry_pick = "true" ]]; then
       echo "Cherry-picking additional fixes for the 2.6 release"
-      cd modules/lib/matter
-      git cherry-pick e734b79
-      git cherry-pick 1536ca2
+      cd ./modules/lib/matter
+
+      # Make sure that the full commit tree is available
+      git fetch ncs master
+
+      git cherry-pick e734b79 --no-commit || { echo "Cherry-pick of e734b79 failed"; exit 1; }
+      git cherry-pick 1536ca2 --no-commit || { echo "Cherry-pick of e734b79 failed"; exit 1; }
     fi
 EOT
 
