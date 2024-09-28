@@ -48,7 +48,7 @@ jobs:
           docker build -t andreasbauer/nrfconnect-sdk:${{ matrix.sdk_nrf_branch }} \
             --build-arg sdk_nrf_branch=${{ matrix.sdk_nrf_branch }} \
             --build-arg toolchain_version=${{ matrix.toolchain_version }} \
-            --build-arg nrf_26_cherry_pick=${{ matrix.nrf_26_cherry_pick }} \ 
+            --build-arg nrf_26_cherry_pick=${{ matrix.nrf_26_cherry_pick }} \
             .
 
       - name: Build asset_tracker_v2 application
